@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+
+require 'acme_widget_co'
+include AcmeWidgetCo
+
+catalogue = Catalogue.new(products: [
+  Product.new(code: 'R01', name: 'Red Widget',   price: '32.95'),
+  Product.new(code: 'G01', name: 'Green Widget', price: '24.95'),
+  Product.new(code: 'B01', name: 'Blue Widget',  price: '7.95')
+])
+
+delivery = Delivery::TieredRule.new(
+  bands: [
+    { lt: '50', cost: '4.95' },
+    { lt: '90', cost: '2.95' }
+  ],
+  else_cost: 0
+)
+
+offers = [Offers::SecondItemHalfPrice.new(product_code: 'R01')]
+
+basket = Basket.new(catalogue: catalogue, delivery_rule: delivery, offers: offers)
+
+ARGV.each { |code| basket.add(code) }
+
+puts basket.total_formatted
